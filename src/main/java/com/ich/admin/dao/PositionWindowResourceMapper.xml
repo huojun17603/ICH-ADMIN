@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ich.admin.dao.PositionWindowResourceMapper">
+	
+	
+	<select id="selectPWRDtoByPositionId" resultType="com.ich.admin.dto.PositionWindowResourceDto">
+		SELECT
+			SW_Name as name,
+			PW_PositionId as positionId,
+			SW_Code as windowCode,
+			PW_IsRead as isRead
+		FROM ich_sys_windowresource
+		LEFT JOIN (SELECT * FROM ich_org_positionwindowresource WHERE PW_PositionId = #{positionId}) as PW ON PW_WindowCode = SW_Code
+		WHERE SW_SM = #{modular}
+	</select>
+	
+	<select id="selectBy2PK" parameterType="map" resultType="com.ich.admin.pojo.PositionWindowResource">
+		SELECT 
+			PW_PositionId as positionId,
+			PW_WindowCode as windowCode,
+			PW_IsRead as isRead
+		FROM ich_org_positionwindowresource
+		WHERE PW_PositionId = #{positionId} AND PW_WindowCode = #{windowCode}
+	</select>
+	
+	<update id="updatePositionWindowResource" parameterType="com.ich.admin.pojo.PositionWindowResource">
+		UPDATE ich_org_positionwindowresource SET PW_IsRead = #{isRead}
+		WHERE PW_PositionId = #{positionId} AND PW_WindowCode = #{windowCode}
+	</update>
+	
+	<insert id="insertPositionWindowResource" parameterType="com.ich.admin.pojo.PositionWindowResource">
+		INSERT INTO ich_org_positionwindowresource(PW_PositionId,PW_WindowCode,PW_IsRead)
+		VALUES(#{positionId},#{windowCode},#{isRead})
+	</insert>
+	
+	<delete id="clearByPosId" parameterType="String">
+		DELETE FROM ich_org_positionwindowresource WHERE PW_PositionId = #{positionId}
+	</delete>
+	
+	
+	
+	
+</mapper>

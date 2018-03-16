@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ich.admin.dao.PositionMenuResourceMapper">
+	
+	<insert id="insertPositionMenuResource" parameterType="com.ich.admin.pojo.PositionMenuResource">
+		INSERT INTO ich_org_positionmenuresource(PM_PositionId,PM_MenCode,PM_IsRead,PM_IsWrite,PM_IsEdit,PM_IsAudit,PM_IsDelete)
+		VALUES(#{positionId},#{menuCode},#{isRead},#{isWrite},#{isEdit},#{isAudit},#{isDelete})
+	</insert>
+	
+	<update id="updatePositionMenuResource" parameterType="com.ich.admin.pojo.PositionMenuResource">
+		UPDATE ich_org_positionmenuresource
+		SET PM_IsRead = #{isRead},PM_IsWrite = #{isWrite},PM_IsEdit = #{isEdit},PM_IsAudit = #{isAudit},PM_IsDelete = #{isDelete}
+		WHERE PM_PositionId = #{positionId} AND PM_MenCode=#{menuCode}
+	</update>
+	
+	
+	<delete id="clearByPosId" parameterType="String">
+		DELETE FROM ich_org_positionmenuresource WHERE PM_PositionId = #{positionId}
+	</delete>
+	
+	<select id="selectBy2PK" parameterType="map" resultType="com.ich.admin.pojo.PositionMenuResource">
+		SELECT
+			PM_PositionId as positionId, 
+			PM_MenCode as menuCode,
+			PM_IsRead as isRead,
+			PM_IsWrite as isWrite,
+			PM_IsEdit as isEdit,
+			PM_IsAudit as isAudit,
+			PM_IsDelete as isDelete
+		FROM ich_org_positionmenuresource
+		WHERE PM_PositionId = #{positionId} AND PM_MenCode=#{menuCode}
+	</select>
+	
+	
+	<select id="selectMenuResourceTree" parameterType="map" resultType="com.ich.admin.dto.PositionMenuResourceTree">
+		SELECT 
+			SR_Name as menuName,
+			SR_Code as menuCode,
+			SR_Type as menuType,
+			PM_PositionId as positionId, 
+			PM_IsRead as isRead,
+			PM_IsWrite as isWrite,
+			PM_IsEdit as isEdit,
+			PM_IsAudit as isAudit,
+			PM_IsDelete as isDelete
+		FROM ich_sys_menuresource
+		LEFT JOIN (SELECT * FROM ich_org_positionmenuresource WHERE PM_PositionId = #{positionId} ) as PM on PM_MenCode = SR_Code
+		WHERE SR_Parent=#{menuCode} AND SR_Type != 3 AND SR_SM = #{modular}
+		ORDER BY SR_Sequence
+	</select>
+	
+	
+	
+	
+</mapper>

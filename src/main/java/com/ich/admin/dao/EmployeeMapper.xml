@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ich.admin.dao.EmployeeMapper">
+
+
+	<sql id="BASE_SELECT_SQL">
+		OE_Id as id,
+		OE_OP_Id as positionId,
+		OE_OO_Id as orgId,
+		OE_Code as logincode,
+		OE_Key as loginkey,
+		OE_Keycode as keyCode,
+		OE_Name as name,
+		OE_Phone as phone,
+		OE_Email as email,
+		OE_Status as 'status',
+		OE_Createtime as createTime
+	</sql>
+
+	<select id="queryEmployee" parameterType="map" resultType="com.ich.admin.dto.EmployeeQueryDto">
+		SELECT 
+			OE_Id as id,
+			OE_Name as name,
+			OE_Phone as phone,
+			OE_Email as email,
+			OE_Status as 'status',
+			OE_Code as logincode,
+			OE_OP_Id as positionId,
+			OP_Name as positionName,
+			OO_Id as orgId,
+			OO_OrgName as orgName
+		FROM ich_org_employee
+		LEFT JOIN ich_org_position ON OP_Id = OE_OP_Id
+		LEFT JOIN ich_org_organization ON OP_OrgId = OO_Id
+		WHERE 1=1
+		<if test="dto.orgId != null and dto.orgId != ''"> AND OO_Id = #{dto.orgId} </if>
+		<if test="dto.name != null and dto.name != ''"> AND OE_Name like '%${dto.name}%'</if>
+		<if test="dto.status != null"> AND OE_Status = #{dto.status}</if>
+		
+	</select>
+	
+	<select id="selectEmployeeQueryByAccountId"  parameterType="String" resultType="com.ich.admin.dto.EmployeeQueryDto">
+		SELECT
+			OE_Id as id,
+			OE_SA_Id as accountId,
+			SA_Code as accountCode,
+			OE_OP_Id as positionId,
+			OE_Name as name,
+			OE_Phone as phone,
+			OE_Email as email,
+			OE_Status as 'status'
+		FROM ich_org_employee 
+		LEFT JOIN ich_sys_account on OE_SA_Id = SA_Id
+		WHERE OE_SA_Id = #{accountId}
+	</select>
+	
+	<select id="selectEmployeeMenuList" parameterType="String" resultType="com.ich.admin.dto.EmployeeMenuDto">
+		SELECT 
+			SR_Code as code,
+			SR_Name as name,
+			SR_URL as url,
+			SR_Parent as parent,
+			SR_Type as type,
+			SR_Level as level,
+			SR_Icon as icon,
+			SR_View as 'view',
+			SR_Doc as doc,
+			PM_IsRead as isRead,
+			PM_IsWrite as isWrite,
+			PM_IsEdit as isEdit,
+			PM_IsAudit as isAudit,
+			PM_IsDelete as isDelete
+		FROM ich_sys_menuresource
+		LEFT JOIN ich_org_positionmenuresource on SR_Code = PM_MenCode
+		LEFT JOIN ich_org_employee on OE_OP_Id = PM_PositionId
+		WHERE OE_Id = #{id}
+		ORDER BY SR_Sequence
+	</select>
+	
+	<select id="selectEmployeeWindowList" parameterType="String" resultType="com.ich.admin.dto.EmployeeWindowDto">
+		SELECT 
+			SW_Code as code,
+			SW_Name as name,
+			SW_Url as url,
+			SW_Include as include,
+			PW_IsRead as isRead
+		FROM ich_sys_windowresource
+		LEFT JOIN ich_org_positionwindowresource ON SW_Code = PW_WindowCode
+		LEFT JOIN ich_org_employee ON OE_OP_Id = PW_PositionId
+		WHERE OE_Id = #{id}
+	</select>
+	
+	<select id="selectByPosId" parameterType="String" resultType="com.ich.admin.pojo.Employee">
+		SELECT <include refid="BASE_SELECT_SQL" />
+		FROM ich_org_employee 
+		WHERE OE_OP_Id = #{id}
+	</select>
+	
+	<select id="selectByOrgIds" parameterType="String" resultType="com.ich.admin.pojo.Employee">
+		SELECT <include refid="BASE_SELECT_SQL" />
+		FROM ich_org_employee
+		WHERE OE_OO_Id in (${_parameter})
+	</select>
+	
+	<select id="selectById"  parameterType="String" resultType="com.ich.admin.pojo.Employee">
+		SELECT <include refid="BASE_SELECT_SQL" />
+		FROM ich_org_employee 
+		WHERE OE_Id = #{id}
+	</select>
+
+	<select id="selectByCode"  parameterType="String" resultType="com.ich.admin.pojo.Employee">
+		SELECT <include refid="BASE_SELECT_SQL" />
+		FROM ich_org_employee
+		WHERE OE_Code = #{logincode}
+	</select>
+
+	<update id="updateKey" >
+		UPDATE ich_org_employee
+		SET OE_Key = #{loginkey}
+		WHERE OE_Id = #{id}
+	</update>
+
+	<update id="updateStatus" >
+		UPDATE ich_org_employee 
+		SET OE_Status = #{status}
+		WHERE OE_Id = #{id}
+	</update>
+
+	<insert id="insertQuick" parameterType="com.ich.admin.pojo.Employee">
+		INSERT INTO ich_org_employee(OE_Id,OE_OP_Id,OE_OO_Id,OE_Code,OE_Key,OE_Keycode,OE_Name,OE_Phone,OE_Email,OE_Status,OE_Createtime)
+		VALUES(#{id},#{positionId},#{orgId},#{logincode},#{loginkey},#{keyCode},#{name},#{phone},#{email},#{status},#{createTime})
+	</insert>
+
+	<update id="updateBase" parameterType="com.ich.admin.pojo.Employee">
+		UPDATE ich_org_employee
+		SET OE_OP_Id = #{positionId},OE_OO_Id = #{orgId}, OE_Name = #{name},OE_Phone = #{phone},OE_Email = #{email}
+		WHERE OE_Id = #{id}
+	</update>
+
+</mapper>

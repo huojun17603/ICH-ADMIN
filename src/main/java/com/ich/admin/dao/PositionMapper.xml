@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ich.admin.dao.PositionMapper">
+	
+	<select id="queryByOrgId"  parameterType="map" resultType="com.ich.admin.dto.PositionDto">
+		SELECT
+			OP_Id as id,
+			OP_Name as name,
+			OP_OrgId as orgId,
+			(SELECT OO_OrgName FROM ich_org_organization WHERE OO_Id = OP_OrgId) as orgName,
+			OP_PermissionOrgId as permissionOrgId,
+			(SELECT OO_OrgName FROM ich_org_organization WHERE OO_Id = permissionOrgId) as permissionOrgName
+		FROM ich_org_position
+		WHERE OP_OrgId = #{orgId}
+		ORDER BY OP_Name
+	</select>
+	
+	<select id="selectDtoByOrgId" parameterType="String" resultType="com.ich.admin.dto.PositionDto">
+		SELECT 
+			OP_Id as id,
+			OP_Name as name,
+			OP_OrgId as orgId,
+			(SELECT OO_OrgName FROM ich_org_organization WHERE OO_Id = OP_OrgId) as orgName,
+			OP_PermissionOrgId as permissionOrgId,
+			(SELECT OO_OrgName FROM ich_org_organization WHERE OO_Id = permissionOrgId) as permissionOrgName
+		FROM ich_org_position
+		WHERE OP_OrgId = #{orgId}
+		ORDER BY OP_Name
+	</select>
+	
+	<select id="selectByOrgIds" parameterType="String" resultType="com.ich.admin.pojo.Position">
+		SELECT 
+			OP_Id as id,
+			OP_Name as name,
+			OP_OrgId as orgId,
+			OP_PermissionOrgId as permissionOrgId
+		FROM ich_org_position
+		WHERE OP_OrgId in (${_parameter})
+	</select>
+	
+	<select id="selectById" parameterType="String" resultType="com.ich.admin.pojo.Position">
+		SELECT 
+			OP_Id as id,
+			OP_Name as name,
+			OP_OrgId as orgId,
+			OP_PermissionOrgId as permissionOrgId
+		FROM ich_org_position
+		WHERE OP_Id = #{positionId}
+	</select>
+	
+	<insert id="insertPosition" parameterType="com.ich.admin.pojo.Position">
+		INSERT INTO ich_org_position(OP_Id,OP_Name,OP_OrgId,OP_PermissionOrgId)
+		VALUES(#{id},#{name},#{orgId},#{permissionOrgId})
+	</insert>
+	
+	<update id="updatePosition" parameterType="com.ich.admin.pojo.Position">
+		UPDATE ich_org_position
+		SET OP_Name = #{name},OP_OrgId = #{orgId},OP_PermissionOrgId = #{permissionOrgId}
+		WHERE OP_Id = #{id}
+	</update>
+	
+	<delete id="deletePosition" parameterType="String">
+		DELETE FROM ich_org_position WHERE OP_Id = #{positionId}
+	</delete>
+	
+</mapper>

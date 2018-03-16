@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ich.admin.dao.OrganizationMapper">
+	
+	<insert id="insertOrganization" parameterType="com.ich.admin.pojo.Organization">
+		INSERT INTO ich_org_organization(OO_Id,OO_OrgName,OO_Leader,OO_DeputyLeader,OO_ParentId)
+		VALUES(#{id},#{orgName},#{leader},#{deputyLeader},#{parentId})
+	</insert>
+	
+	<update id="updateOrganization" parameterType="com.ich.admin.pojo.Organization">
+		UPDATE ich_org_organization
+		SET OO_OrgName = #{orgName},OO_Leader = #{leader},OO_DeputyLeader = #{deputyLeader},OO_ParentId = #{parentId}
+		WHERE OO_Id = #{id}
+	</update>
+	
+	<select id="selectOrganizationListByParentId" parameterType="String" resultType="com.ich.admin.dto.OrganizationDto">
+		SELECT 
+			OO_Id as id,
+			OO_ParentId as parentId,
+			OO_OrgName as orgName,
+			OO_Leader as leader,
+			(SELECT OE_Name FROM ich_org_employee WHERE OE_Id = OO_Leader) as leaderName,
+			OO_DeputyLeader as deputyLeader,
+
+			(SELECT GROUP_CONCAT(OE_Name) FROM ich_org_employee WHERE OE_Id = OO_DeputyLeader) as deputyLeaderName,
+			'closed' as state
+		FROM ich_org_organization
+		WHERE OO_ParentId = #{parentId}
+		ORDER BY OO_OrgName
+	</select>
+
+	<select id="selectById" parameterType="String" resultType="com.ich.admin.pojo.Organization">
+		SELECT 
+			OO_Id as id,
+			OO_ParentId as parentId,
+			OO_OrgName as orgName,
+			OO_Leader as leader,
+			OO_DeputyLeader as deputyLeader
+		FROM ich_org_organization
+		WHERE OO_Id = #{id}
+	</select>
+	
+	<delete id="delete" parameterType="String">
+		DELETE FROM ich_org_organization WHERE OO_Id = #{id}
+	</delete>
+	
+</mapper>
